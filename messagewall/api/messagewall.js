@@ -5,15 +5,13 @@ export function get(params) {
 }
 
 export function create(body) {
-  return httpClient.post("/posts", {
-    body
-  });
+  return httpClient.post("/posts", body);
 }
 
 export function put(body) {
   return httpClient.put("/posts", { body });
 }
 
-export function del (id) {
+export function del(id) {
   return httpClient.delete(`/posts/${id}`);
 }
