@@ -1,13 +1,14 @@
 <script setup>
-import { ElInput, ElButton, ElMessage } from 'element-plus'
+import { ElInput, ElButton, ElMessage, ElDialog } from 'element-plus'
 import { ref, computed } from 'vue';
 import dayjs from 'dayjs'
-import { get, del as delApi, create } from '../../api/messagewall'
+import { get, del as delApi, create, update as updateApi } from '../../api/messagewall'
 
 const posts = ref([])
 const keywords = ref('')
 const publishVisible = ref(false)
 const content = ref('')
+const editContent = ref('')
 const getMessage = async () => {
   const res = await get({ search: keywords.value })
   posts.value = res.results
@@ -37,12 +38,35 @@ const publishStepOne = () => {
 }
 const publishStepTwo = async () => {
   const res = await create({ content: content.value })
-  console.log(res, 'res')
   if (res) {
     content.value = ''
     publishVisible.value = false
     getMessage()
   }
+}
+const cancelPublish = () => {
+  publishVisible.value = false
+}
+
+const updateStepOne = (id) => {
+  const current = posts.value.find(item => item.post_id === id)
+  editContent.value = current.content
+  current.editing = true
+}
+
+const update = async (id) => {
+  const res = await updateApi(id, { content: editContent.value })
+  if (res === null) {
+    editContent.value = ''
+    const current = posts.value.find(item => item.post_id === id)
+    current.editing = false
+    getMessage()
+  }
+}
+
+const cancelUpdate = (id) => {
+  const current = posts.value.find(item => item.post_id === id)
+  current.editing = false
 }
 
 getMessage()
@@ -61,11 +85,6 @@ getMessage()
         清除
       </el-button>
     </div>
-    <div v-if="publishVisible">
-      <el-input type='textarea' v-model="content"></el-input>
-      <el-button @click="publishStepTwo">发布</el-button>
-      <el-button @click="cancelPublish">取消</el-button>
-    </div>
     <div class="msg-item" v-for="({ post_id, content, publish_time, editing }) in formatPosts" :key="post_id">
       <div v-if="!editing">{{ content }}</div>
       <div v-else>
@@ -74,10 +93,15 @@ getMessage()
         <el-button @click="cancelUpdate(post_id)">取消</el-button>
       </div>
       <div>{{ publish_time }}</div>
-      <button @click="updateStepOne(post_id)" class="btn">编辑</button>
-      <button @click="del(post_id)" class="btn">删除</button>
+      <el-button @click="updateStepOne(post_id)" class="btn">编辑</el-button>
+      <el-button @click="del(post_id)" class="btn">删除</el-button>
     </div>
-    <input type="button" @click="publishStepOne" class="publish-btn" value="发布">
+    <input type="button" @click="publishStepOne" class="publish-btn" value="发布" />
+    <el-dialog v-model="publishVisible" title="发布消息">
+      <el-input type='textarea' v-model="content"></el-input>
+      <el-button @click="publishStepTwo">发布</el-button>
+      <el-button @click="cancelPublish">取消</el-button>
+    </el-dialog>
   </div>
 </template>
 

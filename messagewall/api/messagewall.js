@@ -8,8 +8,8 @@ export function create(body) {
   return httpClient.post("/posts", body);
 }
 
-export function put(body) {
-  return httpClient.put("/posts", { body });
+export function update(id, body) {
+  return httpClient.put(`/posts/${id}`, body);
 }
 
 export function del(id) {
