@@ -5,10 +5,10 @@ import dayjs from 'dayjs'
 import { get, del as delApi, create, update as updateApi, MessageRaw, Id } from '../../api/messagewall'
 
 const posts = ref<MessageRaw>([])
-const keywords = ref('')
-const publishVisible = ref(false)
-const content = ref('')
-const editContent = ref('')
+const keywords = ref<string>('')
+const publishVisible = ref<boolean>(false)
+const content = ref<string>('')
+const editContent = ref<string>('')
 const getMessage = async () => {
   const res = await get({ search: keywords.value })
   posts.value = res.results
@@ -52,8 +52,10 @@ const cancelPublish = () => {
 
 const updateStepOne = (id: Id) => {
   const current = posts.value.find(item => item.post_id === id)
-  editContent.value = current.content
-  current.editing = true
+  if (current) {
+    editContent.value = current.content
+    current.editing = true
+  }
 }
 
 const update = async (id: Id) => {
@@ -61,14 +63,18 @@ const update = async (id: Id) => {
   if (res === null) {
     editContent.value = ''
     const current = posts.value.find(item => item.post_id === id)
-    current.editing = false
-    getMessage()
+    if (current) {
+      current.editing = false
+      getMessage()
+    }
   }
 }
 
 const cancelUpdate = (id: Id) => {
   const current = posts.value.find(item => item.post_id === id)
-  current.editing = false
+  if (current) {
+    current.editing = false
+  }
 }
 
 getMessage()
