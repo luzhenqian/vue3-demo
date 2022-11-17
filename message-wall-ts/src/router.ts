@@ -2,6 +2,13 @@
 // 也可以从其他文件导入
 import MessageWall from "./components/MessageWall.vue";
 import Welcome from "./components/Welcome.vue";
+import NotFound from "./components/NotFound.vue";
+import Nav from "./components/Nav.vue";
+import Profile from "./components/Profile.vue";
+import Left from "./components/Left.vue";
+import Content from "./components/Content.vue";
+import Right from "./components/Right.vue";
+import Layout from "./components/Layout.vue";
 
 import { createRouter, createWebHashHistory } from "vue-router";
 
@@ -9,8 +16,26 @@ import { createRouter, createWebHashHistory } from "vue-router";
 // 每个路由都需要映射到一个组件。
 // 我们后面再讨论嵌套路由。
 const routes = [
-  { path: "/", component: Welcome },
-  { path: "/message-wall", component: MessageWall },
+  {
+    path: "/",
+    component: Nav,
+    children: [
+      { path: "", component: Welcome },
+      { path: "message-wall/:id?", component: MessageWall, props: true },
+      { path: ":pathMatch(.*)*", name: "NotFound", component: NotFound },
+      { path: "profile", name: "Profile", component: Profile },
+      {
+        path: "layout",
+        name: "Layout",
+        components: {
+          default: Layout,
+          left: Left,
+          right: Right,
+          content: Content,
+        },
+      },
+    ],
+  },
 ];
 
 // 3. 创建路由实例并传递 `routes` 配置

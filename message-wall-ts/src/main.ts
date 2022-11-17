@@ -10,5 +10,3 @@ const app = createApp(App);
 app.use(router);
 
 app.mount("#app");
-
-// 现在，应用已经启动了！

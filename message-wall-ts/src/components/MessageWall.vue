@@ -4,13 +4,27 @@ import { ref, computed } from 'vue';
 import dayjs from 'dayjs'
 import { get, del as delApi, create, update as updateApi, MessageRaw, Id } from '../../api/messagewall'
 
+const props = defineProps({
+  id: String
+})
+
 const posts = ref<MessageRaw>([])
 const keywords = ref<string>('')
 const publishVisible = ref<boolean>(false)
 const content = ref<string>('')
 const editContent = ref<string>('')
+
 const getMessage = async () => {
   const res = await get({ search: keywords.value })
+  const id = props.id
+
+  if (id) {
+    const result = res.results.find(item => item.post_id === Number(id))
+    res.results = []
+    if (result) {
+      res.results.push(result)
+    }
+  }
   posts.value = res.results
 }
 
