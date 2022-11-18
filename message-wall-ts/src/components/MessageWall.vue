@@ -1,97 +1,20 @@
 <script setup lang="ts">
-import { ElInput, ElButton, ElMessage, ElDialog } from 'element-plus'
-import { ref, computed } from 'vue';
-import dayjs from 'dayjs'
-import { get, del as delApi, create, update as updateApi, MessageRaw, Id } from '../../api/messagewall'
+import { ElInput, ElButton, ElDialog } from 'element-plus'
+import { useMessage, usePublish, useDelete, useUpdate } from '../../hooks/message-wall'
 
 const props = defineProps({
   id: String
 })
 
-const posts = ref<MessageRaw>([])
-const keywords = ref<string>('')
-const publishVisible = ref<boolean>(false)
-const content = ref<string>('')
-const editContent = ref<string>('')
-
-const getMessage = async () => {
-  const res = await get({ search: keywords.value })
-  const id = props.id
-
-  if (id) {
-    const result = res.results.find(item => item.post_id === Number(id))
-    res.results = []
-    if (result) {
-      res.results.push(result)
-    }
-  }
-  posts.value = res.results
-}
-
-const formatPosts = computed<MessageRaw>(() => {
-  return posts.value.map(post => ({
-    ...post,
-    publish_time: dayjs((post.publish_time as number) * 1000).format('YYYY年MM月DD日'),
-    editing: false
-  }))
-})
-
-const clear = () => {
-  keywords.value = ''
-  getMessage()
-}
-
-const del = async (id: Id) => {
-  const res = await delApi(id)
-  if (res === null) {
-    ElMessage({ message: '删除成功', type: 'success' })
-    getMessage()
-  }
-}
-
-const publishStepOne = () => {
-  publishVisible.value = true
-}
-const publishStepTwo = async () => {
-  const res = await create({ content: content.value })
-  if (res) {
-    content.value = ''
-    publishVisible.value = false
-    getMessage()
-  }
-}
-const cancelPublish = () => {
-  publishVisible.value = false
-}
-
-const updateStepOne = (id: Id) => {
-  const current = posts.value.find(item => item.post_id === id)
-  if (current) {
-    editContent.value = current.content
-    current.editing = true
-  }
-}
-
-const update = async (id: Id) => {
-  const res = await updateApi(id, { content: editContent.value })
-  if (res === null) {
-    editContent.value = ''
-    const current = posts.value.find(item => item.post_id === id)
-    if (current) {
-      current.editing = false
-      getMessage()
-    }
-  }
-}
-
-const cancelUpdate = (id: Id) => {
-  const current = posts.value.find(item => item.post_id === id)
-  if (current) {
-    current.editing = false
-  }
-}
-
-getMessage()
+const { formatPosts, posts, reload, keywords, clear } = useMessage(props.id)
+const { publishVisible, content, publishStepOne, publishStepTwo, cancelPublish } = usePublish(reload)
+const { del } = useDelete(reload)
+const {
+  editContent,
+  updateStepOne,
+  update,
+  cancelUpdate,
+} = useUpdate(posts, reload)
 </script>
 
 <template>
@@ -100,7 +23,7 @@ getMessage()
     <div>
       <el-input v-model="keywords" type="text" placeholder="请输入您要搜索内容">
       </el-input>
-      <el-button @click="getMessage">
+      <el-button @click="reload">
         搜索
       </el-button>
       <el-button @click="clear">
