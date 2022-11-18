@@ -9,6 +9,7 @@ import Left from "./components/Left.vue";
 import Content from "./components/Content.vue";
 import Right from "./components/Right.vue";
 import Layout from "./components/Layout.vue";
+import Counter from "./components/Counter.vue";
 
 import { createRouter, createWebHashHistory } from "vue-router";
 
@@ -24,6 +25,7 @@ const routes = [
       { path: "message-wall/:id?", component: MessageWall, props: true },
       { path: ":pathMatch(.*)*", name: "NotFound", component: NotFound },
       { path: "profile", name: "Profile", component: Profile },
+      { path: "counter", name: "Counter", component: Counter },
       {
         path: "layout",
         name: "Layout",

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ElInput, ElButton, ElDialog } from 'element-plus'
+import { ElInput, ElButton, ElDialog, ElAvatar } from 'element-plus'
 import { useMessage, usePublish, useDelete, useUpdate } from '../../hooks/message-wall'
+import { useCounterStore } from '../../stores/user'
 
 const props = defineProps({
   id: String
@@ -15,6 +16,8 @@ const {
   update,
   cancelUpdate,
 } = useUpdate(posts, reload)
+
+const user = useCounterStore()
 </script>
 
 <template>
@@ -31,6 +34,7 @@ const {
       </el-button>
     </div>
     <div class="msg-item" v-for="({ post_id, content, publish_time, editing }) in formatPosts" :key="post_id">
+      <el-avatar :src="user.avatar"></el-avatar>
       <div v-if="!editing">{{ content }}</div>
       <div v-else>
         <el-input type='textarea' v-model='editContent'></el-input>
